@@ -1,0 +1,9 @@
+# Eclipse project files
+*/bin/
+*/tmp/
+*.class
+*.classpath
+
+# Eclipse workspace files
+.metadata/
+.recommenders/
