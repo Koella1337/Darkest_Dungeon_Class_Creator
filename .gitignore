@@ -1,7 +1,9 @@
+#Custom Ignores
+testing/
+
 # Eclipse project files
-*/bin/
-*/tmp/
-*.class
+bin/
+tmp/
 *.classpath
 
 # Eclipse workspace files
