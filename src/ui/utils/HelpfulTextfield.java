@@ -8,7 +8,7 @@ import javax.swing.JTextField;
 
 /**
  * A JTextfield that displays instructions to the User when it is empty and not in focus.
- * @author Koella1337
+ * @author Koella
  */
 @SuppressWarnings("serial")
 public class HelpfulTextfield extends JTextField {

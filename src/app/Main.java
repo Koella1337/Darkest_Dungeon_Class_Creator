@@ -4,7 +4,7 @@ import ui.MainWindow;
 
 /**
  * Simple entry point for the application.
- * @author Koella1337
+ * @author Koella
  */
 public class Main {
 
