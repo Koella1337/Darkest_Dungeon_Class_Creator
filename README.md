@@ -1,7 +1,9 @@
 # Darkest Dungeon Class Creator
 
 A small program providing utilities for creating custom classes to 
-[Darkest Dungeon](https://store.steampowered.com/app/262060/Darkest_Dungeon/) modders.
+[Darkest Dungeon](https://store.steampowered.com/app/262060/Darkest_Dungeon/) modders.  
+To use it you must hava Java installed. You can find the executable .jar file in the latest Release.  
+Releases are slightly left and above the green "Clone or Download" button on the github project page. ;)
 
 **Current features:**
 - Renaming all files from an existing class to your new class.  
