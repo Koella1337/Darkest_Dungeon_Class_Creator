@@ -109,12 +109,10 @@ public class ClassRenamer {
 	private void processAtlasFile(Path atlasFile, String oldName, String newName) {
 		try {
 			List<String> lines = Files.readAllLines(atlasFile);
-			boolean foundName = false;		//only replace first occurence of oldName
-			
 			for (int i = 0; i < lines.size(); i++) {
-				if (!foundName && lines.get(i).startsWith(oldName)) {
+				if (lines.get(i).startsWith(oldName)) {
 					lines.add(i, lines.remove(i).replaceFirst(oldName, newName));
-					foundName = true;
+					break;		//only replace first occurrence
 				}
 			}
 			Files.write(atlasFile, lines);
