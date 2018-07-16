@@ -94,7 +94,10 @@ public class MainWindow extends JFrame {
 				classRenamer.start(new File(txtTarget.getText().length() == 0 ? Globals.WORKING_DIR : txtTarget.getText())
 						, txtOldName.getText(), txtNewName.getText());
 			} catch (IllegalArgumentException e) {
-				Globals.displayError("One of the text fields is invalid!");
+				Globals.displayError("<html><body>One of the textfields is invalid!<br>"
+						+ "Is the target path correct? (directory of hero to rename)<br>"
+						+ "Are the names only lowercase letters with '_' in-between?"
+						+ "</html></body>");
 			}
 		});
 		

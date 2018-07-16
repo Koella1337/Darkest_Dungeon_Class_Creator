@@ -1,5 +1,6 @@
 #Custom Ignores
 testing/
+*.jar
 
 # Eclipse project files
 bin/
