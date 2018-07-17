@@ -17,4 +17,15 @@ public class Globals {
 		JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
+	/**
+	 * Wraps a String with the &lt;html&gt; and &lt;body&gt; tags.
+	 */
+	public static String wrapWithHtml(String str) {
+		StringBuilder sb = new StringBuilder(str.length() + 26);
+		sb.append("<html><body>");		//12 chars
+		sb.append(str);
+		sb.append("</body></html>");	//14 chars
+		return sb.toString();
+	}
+	
 }

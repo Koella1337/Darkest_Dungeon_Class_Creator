@@ -20,11 +20,26 @@ public class HelpfulTextfield extends JTextField {
 	 * Creates a new HelpfulTextfield that displays the instructionString when the field is empty and not in focus.
 	 * 
 	 * @param instructionString - the string to be displayed to the user, for example telling him the purpose of this field
+	 */
+	public HelpfulTextfield(String instructionString) {
+		super();
+		this.instructions = instructionString;
+		setup();
+	}
+	
+	/**
+	 * Creates a new HelpfulTextfield that displays the instructionString when the field is empty and not in focus.
+	 * 
+	 * @param instructionString - the string to be displayed to the user, for example telling him the purpose of this field
 	 * @param columns - used to calculate the preferred width of the textfield
 	 */
-	public HelpfulTextfield (String instructionString, int columns) {
+	public HelpfulTextfield(String instructionString, int columns) {
 		super(columns);
 		this.instructions = instructionString;
+		setup();
+	}
+	
+	private void setup() {
 		reset();
 		
 		this.addFocusListener(new FocusListener() {
