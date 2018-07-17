@@ -17,8 +17,8 @@ import javax.swing.border.EmptyBorder;
 
 import app.ClassRenamer;
 import app.InfoFileCreator;
+import app.utils.Globals;
 import ui.utils.FormFactory;
-import ui.utils.Globals;
 import ui.utils.HelpfulTextfield;
 import ui.utils.TutorialPanel;
 

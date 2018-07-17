@@ -1,4 +1,4 @@
-package ui.utils;
+package app.utils;
 
 import java.awt.Dimension;
 import java.nio.file.Paths;
