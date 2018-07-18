@@ -80,7 +80,7 @@ public class HelpfulTextfield extends JTextField {
 	public void reset() {
 		if (hasFocus()) {
 			setText("");
-			super.setFont(new Font(getFont().getName(), Font.PLAIN, getFont().getSize()));
+			super.setFont(new Font(getFont().getName(), fontStyle, getFont().getSize()));
 		}
 		else {
 			setText(instructions);

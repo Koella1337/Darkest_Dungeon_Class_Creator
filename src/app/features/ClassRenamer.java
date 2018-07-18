@@ -1,4 +1,4 @@
-package app;
+package app.features;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import app.utils.Globals;
 
 /**
  * Used to rename all files of an existing Darkest Dungeon class.<br>
@@ -22,7 +24,7 @@ public class ClassRenamer {
 		threadPool.shutdown();
 	}
 	
-	public boolean isValid(String name) {
+	public static boolean isClassNameValid(String name) {
 		//exclude special cases because of Darkest Dungeons given folders & files
 		if (name.length() <= 4 && (name.startsWith("a") || name.startsWith("e") || name.startsWith("f"))) {
 			switch (name) {
@@ -36,8 +38,7 @@ public class ClassRenamer {
 		if (name.startsWith("eqp_")) return false;
 		if (name.equals("icons_equip")) return false;
 		
-		//only allow losercase letters with '_' in-between
-		return name.matches("([a-z]+(_[a-z]+)?)+");
+		return Globals.isNameValid(name);
 	}
 	
 	/** 
@@ -45,8 +46,10 @@ public class ClassRenamer {
 	 * @throws IllegalArgumentException if either String is null or invalid or if dir is not a directory.
 	 */
 	public void start(File dir, String oldName, String newName) throws IllegalArgumentException {
-		if (dir == null || oldName == null || newName == null || !dir.isDirectory() || !isValid(oldName) || !isValid(newName))
+		if (dir == null || oldName == null || newName == null || !dir.isDirectory() 
+				|| !isClassNameValid(oldName) || !isClassNameValid(newName)) {
 			throw new IllegalArgumentException();
+		}
 		
 		threadPool.submit(() -> {
 			this.renameFilesAndDirectory(dir, oldName, newName);

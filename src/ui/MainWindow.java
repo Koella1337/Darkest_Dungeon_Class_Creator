@@ -3,21 +3,33 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import app.ClassRenamer;
-import app.InfoFileCreator;
+import app.features.ClassRenamer;
+import app.features.InfoFileCreator;
 import app.utils.Globals;
+import app.utils.Strings;
+import ui.utils.AddItemCombobox;
+import ui.utils.CombatSkillsPanel;
 import ui.utils.FormFactory;
 import ui.utils.HelpfulTextfield;
 import ui.utils.TutorialPanel;
@@ -91,40 +103,64 @@ public class MainWindow extends JFrame {
 		});
 		topPanel.add(btnStart);
 		
-		TutorialPanel tutorialPanel = new TutorialPanel(Globals.wrapWithHtml(
-				"Copy an existing class folder (\"SteamApps/common/DarkestDungeon/heroes/&lt;chosenclass&gt;\") to somewhere you want. "
-				+ "Then set the target folder for this program to your copied folder either by moving this program into the folder and "
-				+ "re-opening it or by copying the folder path into the \"Target folder\" text field.<br><br>"
-				+ "Now fill in the \"Old Name\" and \"New Name\" textfields.<br>"
-				+ "These names can only contain lowercase letters with '_' in-between.<br>"
-				+ "--- Example:<br>"
-				+ "--- Target folder: \"C:\\my_mod\\heroes\\crusader\",<br>"
-				+ "--- Old Name: \"crusader\",<br>"
-				+ "--- New Name: \"my_first_class\"<br>"
-				+ "Then press Start and look at your files! :)<br><br>"
-				+ "P.S.: Relative paths and forward-slashes also work."
-		));
+		KeyListener enterListener = Globals.createEnterListener(btnStart);
+		txtTarget.addKeyListener(enterListener);
+		txtOldName.addKeyListener(enterListener);
+		txtNewName.addKeyListener(enterListener);
+		
+		TutorialPanel tutorialPanel = new TutorialPanel(Strings.getClassRenamingTutorial());
 		
 		panel.add(topPanel, BorderLayout.PAGE_START);
 		panel.add(tutorialPanel, BorderLayout.CENTER);
 		return panel;
 	}
 	
-	private Component createInfoCreationPanel() {
+	private JPanel createInfoCreationPanel() {
 		final JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		final JPanel topPanel = new JPanel(new GridLayout(0, 1));
+		final int labelWidth = 90;
 		
-		JTextField txtClassName = new HelpfulTextfield("your_class_name");
-		topPanel.add(FormFactory.createSimpleForm(txtClassName, "Class Name: ", 0));
+		//the first line asks for the class name and the crit effect
+		JPanel firstLinePanel = new JPanel(new GridLayout(1, 0));
+		JTextField txtClassName = new HelpfulTextfield("your_class_name", 20);
+		firstLinePanel.add(txtClassName);
+		firstLinePanel.add(new JLabel("Crit Effect: ", SwingConstants.TRAILING));
+		JComboBox<String> cbxOnCritEffect = new AddItemCombobox(Strings.getDefaultCritEffects(), "add effect...", 
+				"Register on-crit effect", "Your effect name: (don't forget the \"quotation marks\")!");
+		cbxOnCritEffect.setFocusable(false);
+		firstLinePanel.add(cbxOnCritEffect);
+		topPanel.add(FormFactory.createSimpleForm(firstLinePanel, "Class Name: ", labelWidth));
 		
+		MultiStatPanel weaponPanel = new MultiStatPanel(new String[] {
+				"atk: ", "0/0", "min dmg: ", "6/1", "max dmg: ", "12/2", "crit: ", "4/1", "spd: ", "1/1"
+		});
+		topPanel.add(FormFactory.createSimpleForm(weaponPanel, "Weapon: ", labelWidth));
 		
+		MultiStatPanel armorPanel = new MultiStatPanel(new String[] {
+				"def: ", "5/5", "prot: ", "0/0", "hp: ", "33/7", "spd: ", "0/0"
+		});
+		topPanel.add(FormFactory.createSimpleForm(armorPanel, "Armor: ", labelWidth));
+		
+		MultiStatPanel resistancesPanel1 = new MultiStatPanel(new String[] {
+				"stun: ", "40", "poison: ", "30", "bleed: ", "30", "disease: ", "30"
+		});
+		topPanel.add(FormFactory.createSimpleForm(resistancesPanel1, "Resistances: ", labelWidth));
+		
+		MultiStatPanel resistancesPanel2 = new MultiStatPanel(new String[] {
+				"move: ", "40", "debuff: ", "30", "death: ", "67", "trap: ", "10"
+		});
+		topPanel.add(FormFactory.createSimpleForm(resistancesPanel2, "Resistances: ", labelWidth));
+		
+		CombatSkillsPanel cbxCombatSkills = new CombatSkillsPanel();
+		cbxCombatSkills.setFocusable(false);
+		topPanel.add(FormFactory.createSimpleForm(cbxCombatSkills, "Combat Skills: ", labelWidth));
 		
 		panel.add(topPanel, BorderLayout.PAGE_START);
 		return panel;
 	}
 
-	private Component createEffectCreationPanel() {
+	private JPanel createEffectCreationPanel() {
 		final JPanel panel = new JPanel(new BorderLayout());
 		
 		JLabel lblComingSoon = new JLabel("Coming soon!", SwingConstants.CENTER);
