@@ -1,4 +1,4 @@
-package ui;
+package ui.utils;
 
 import java.awt.GridLayout;
 

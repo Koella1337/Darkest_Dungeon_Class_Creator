@@ -32,6 +32,7 @@ import ui.utils.AddItemCombobox;
 import ui.utils.CombatSkillsPanel;
 import ui.utils.FormFactory;
 import ui.utils.HelpfulTextfield;
+import ui.utils.MultiStatPanel;
 import ui.utils.TutorialPanel;
 
 /**
@@ -41,7 +42,7 @@ import ui.utils.TutorialPanel;
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
 	
-	private final JTabbedPane featureTabs;
+	private final JTabbedPane featureTabsPane;
 	private final ClassRenamer classRenamer;
 	private final InfoFileCreator infoFileCreator;
 	
@@ -52,15 +53,15 @@ public class MainWindow extends JFrame {
 		classRenamer = new ClassRenamer();
 		infoFileCreator = new InfoFileCreator();
 		
-		featureTabs = new JTabbedPane(JTabbedPane.TOP);
-		featureTabs.setPreferredSize(Globals.WINDOW_SIZE);
-		featureTabs.setFocusable(false);
+		featureTabsPane = new JTabbedPane(JTabbedPane.TOP);
+		featureTabsPane.setPreferredSize(Globals.WINDOW_SIZE);
+		featureTabsPane.setFocusable(false);
 		
-		featureTabs.add("Rename existing class", createClassRenamingPanel());
-		featureTabs.add("Create \".info\" file", createInfoCreationPanel());
-		featureTabs.add("Create an effect", createEffectCreationPanel());
+		featureTabsPane.add("Rename existing class", createClassRenamingPanel());
+		featureTabsPane.add("Create \".info\" file", createInfoCreationPanel());
+		featureTabsPane.add("Create an effect", createEffectCreationPanel());
 		
-		this.add(featureTabs);
+		this.add(featureTabsPane);
 	}
 	
 	@Override
@@ -96,7 +97,7 @@ public class MainWindow extends JFrame {
 			try {
 				classRenamer.start(new File(txtTarget.getText()), txtOldName.getText(), txtNewName.getText());
 			} catch (IllegalArgumentException e) {
-				Globals.displayError(Globals.wrapWithHtml("One of the textfields is invalid!<br>"
+				Globals.displayError(Strings.wrapWithHtml("One of the textfields is invalid!<br>"
 						+ "Is the target path correct? (directory of hero to rename)<br>"
 						+ "Are the names only lowercase letters with '_' in-between?"));
 			}
@@ -127,7 +128,7 @@ public class MainWindow extends JFrame {
 		firstLinePanel.add(txtClassName);
 		firstLinePanel.add(new JLabel("Crit Effect: ", SwingConstants.TRAILING));
 		JComboBox<String> cbxOnCritEffect = new AddItemCombobox(Strings.getDefaultCritEffects(), "add effect...", 
-				"Register on-crit effect", "Your effect name: (don't forget the \"quotation marks\")!");
+				"Add on-crit effect", "Your effect name: (don't forget the \"quotation marks\"!)");
 		cbxOnCritEffect.setFocusable(false);
 		firstLinePanel.add(cbxOnCritEffect);
 		topPanel.add(FormFactory.createSimpleForm(firstLinePanel, "Class Name: ", labelWidth));
@@ -152,7 +153,7 @@ public class MainWindow extends JFrame {
 		});
 		topPanel.add(FormFactory.createSimpleForm(resistancesPanel2, "Resistances: ", labelWidth));
 		
-		CombatSkillsPanel cbxCombatSkills = new CombatSkillsPanel();
+		CombatSkillsPanel cbxCombatSkills = new CombatSkillsPanel(infoFileCreator);
 		cbxCombatSkills.setFocusable(false);
 		topPanel.add(FormFactory.createSimpleForm(cbxCombatSkills, "Combat Skills: ", labelWidth));
 		

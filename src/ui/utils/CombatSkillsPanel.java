@@ -7,19 +7,21 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
+import app.features.InfoFileCreator;
 import app.model.CombatSkill;
 import app.utils.Globals;
 
 @SuppressWarnings("serial")
 public class CombatSkillsPanel extends JPanel{
+	
+	private final CombatSkill[] combatSkills;
+	private final JComboBox<CombatSkill> cbxCombatSkills;
 
-	public CombatSkillsPanel() {
+	public CombatSkillsPanel(InfoFileCreator infoFileCreator) {
 		super(new BorderLayout(5, 0));
+		combatSkills = infoFileCreator.getAllSkills();
 		
-		JComboBox<CombatSkill> cbxCombatSkills = new JComboBox<>(new CombatSkill[] {
-				new CombatSkill("skill_one"), new CombatSkill("skill_two"), new CombatSkill("skill_three"), new CombatSkill("skill_four"),
-				new CombatSkill("skill_five"), new CombatSkill("skill_six"), new CombatSkill("skill_seven")
-		});
+		cbxCombatSkills = new JComboBox<>(combatSkills);
 		cbxCombatSkills.setFocusable(false);
 		cbxCombatSkills.setFont(Globals.FONT_CONSOLAS);
 		
@@ -35,9 +37,9 @@ public class CombatSkillsPanel extends JPanel{
 	}
 	
 	private void editCombatSkill(int index) {
-		if (index < 0 || index > 6) return;
+		if (index < 0 || index >= combatSkills.length) return;
 		
-		System.err.println("Sel: " + index);
+		combatSkills[index].print(null);
 	}
 	
 }

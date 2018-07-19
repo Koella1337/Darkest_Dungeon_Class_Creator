@@ -38,17 +38,6 @@ public class Globals {
 	}
 	
 	/**
-	 * Wraps a String with the &lt;html&gt; and &lt;body&gt; tags.
-	 */
-	public static String wrapWithHtml(String str) {
-		StringBuilder sb = new StringBuilder(str.length() + 26);
-		sb.append("<html><body>");		//12 chars
-		sb.append(str);
-		sb.append("</body></html>");	//14 chars
-		return sb.toString();
-	}
-	
-	/**
 	 * Creates a new KeyListener that will press the specified button when Enter is released.
 	 */
 	public static KeyListener createEnterListener(JButton buttonToClick) {
