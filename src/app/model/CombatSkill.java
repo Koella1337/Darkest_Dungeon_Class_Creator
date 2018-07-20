@@ -16,7 +16,8 @@ public class CombatSkill {
 	public String id;
 	public Type type;
 	public boolean isMelee, isAoe, isRandom;
-	public String launch, target, effects;
+	public String launch, target;
+	public String effects;		//TODO: probably use List<Effect> instead
 	
 	public AtkDmgCritStruct atkDmgCrit;
 	public MinMaxStruct heal;
@@ -44,12 +45,12 @@ public class CombatSkill {
 		ignore_protection = true;
 		ignore_guard = true;
 		ignore_stealth = true;
-		generation_guaranteed = true;
 		self_target_valid = false;
 		if (id.endsWith("two")) {
 			this.type = Type.HEAL;
 			isAoe = true;
 			effects = "\"test1\" \"test2\"";
+			generation_guaranteed = true;
 			move.min = 1;
 		}
 		else if (id.endsWith("three")) {

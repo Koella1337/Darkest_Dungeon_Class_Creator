@@ -1,23 +1,17 @@
 package ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -43,9 +37,16 @@ import ui.utils.TutorialPanel;
 public class MainWindow extends JFrame {
 	
 	private final JTabbedPane featureTabsPane;
+	private final List<Runnable> onDisposeCleanUpList = new ArrayList<>();
+	
 	private final ClassRenamer classRenamer;
 	private final InfoFileCreator infoFileCreator;
 	
+	/**
+	 * Constructs the main window for the Darkest Dungeon Class Creator application.<br>
+	 * Call <code>createFeaturePanels()</code> after the constructor to fill the feature tabs.<br>
+	 * To display the constructed window call <code>packAndShow()</code>.
+	 */
 	public MainWindow() {
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.setTitle("Darkest Dungeon Class Creator");
@@ -54,20 +55,19 @@ public class MainWindow extends JFrame {
 		infoFileCreator = new InfoFileCreator();
 		
 		featureTabsPane = new JTabbedPane(JTabbedPane.TOP);
-		featureTabsPane.setPreferredSize(Globals.WINDOW_SIZE);
+		featureTabsPane.setPreferredSize(Globals.MAIN_WINDOW_SIZE);
 		featureTabsPane.setFocusable(false);
-		
-		featureTabsPane.add("Rename existing class", createClassRenamingPanel());
-		featureTabsPane.add("Create \".info\" file", createInfoCreationPanel());
-		featureTabsPane.add("Create an effect", createEffectCreationPanel());
 		
 		this.add(featureTabsPane);
 	}
 	
-	@Override
-	public void dispose() {
-		classRenamer.shutdownThreadPool();
-		super.dispose();
+	/**
+	 * This needs to be called separately after the constructor since some features need a reference to this frame.
+	 */
+	public void createFeaturePanels() {
+		featureTabsPane.add("Rename existing class", createClassRenamingPanel());
+		featureTabsPane.add("Create \".info\" file", createInfoCreationPanel());
+		featureTabsPane.add("Create an effect", createEffectCreationPanel());
 	}
 	
 	public void packAndShow() {
@@ -76,20 +76,29 @@ public class MainWindow extends JFrame {
 		this.setVisible(true);
 	}
 	
+	@Override
+	public void dispose() {
+		for (Runnable cleanUpMethod : onDisposeCleanUpList) {
+			cleanUpMethod.run();
+		}
+		super.dispose();
+	}
+	
 	private JPanel createClassRenamingPanel() {
 		final JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		
 		final JPanel topPanel = new JPanel(new GridLayout(0, 1));
 		final int labelWidth = 90;
 		
 		JTextField txtTarget = new JTextField(Globals.WORKING_DIR);
-		topPanel.add(FormFactory.createSimpleForm(txtTarget, "Target folder: ", labelWidth));
+		topPanel.add(FormFactory.createOneInputForm("Target folder: ", txtTarget, labelWidth));
 		
 		JTextField txtOldName = new HelpfulTextfield("old_class_name");
-		topPanel.add(FormFactory.createSimpleForm(txtOldName, "Old Name: ", labelWidth));
+		topPanel.add(FormFactory.createOneInputForm("Old Name: ", txtOldName, labelWidth));
 		
 		JTextField txtNewName = new HelpfulTextfield("your_new_class");
-		topPanel.add(FormFactory.createSimpleForm(txtNewName, "New Name: ", labelWidth));
+		topPanel.add(FormFactory.createOneInputForm("New Name: ", txtNewName, labelWidth));
 		
 		JButton btnStart = new JButton("Start!");
 		btnStart.setFocusable(false);
@@ -101,6 +110,9 @@ public class MainWindow extends JFrame {
 						+ "Is the target path correct? (directory of hero to rename)<br>"
 						+ "Are the names only lowercase letters with '_' in-between?"));
 			}
+		});
+		onDisposeCleanUpList.add(() -> {
+			classRenamer.shutdownThreadPool();
 		});
 		topPanel.add(btnStart);
 		
@@ -119,43 +131,43 @@ public class MainWindow extends JFrame {
 	private JPanel createInfoCreationPanel() {
 		final JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		
 		final JPanel topPanel = new JPanel(new GridLayout(0, 1));
 		final int labelWidth = 90;
 		
 		//the first line asks for the class name and the crit effect
-		JPanel firstLinePanel = new JPanel(new GridLayout(1, 0));
 		JTextField txtClassName = new HelpfulTextfield("your_class_name", 20);
-		firstLinePanel.add(txtClassName);
-		firstLinePanel.add(new JLabel("Crit Effect: ", SwingConstants.TRAILING));
 		JComboBox<String> cbxOnCritEffect = new AddItemCombobox(Strings.getDefaultCritEffects(), "add effect...", 
 				"Add on-crit effect", "Your effect name: (don't forget the \"quotation marks\"!)");
 		cbxOnCritEffect.setFocusable(false);
-		firstLinePanel.add(cbxOnCritEffect);
-		topPanel.add(FormFactory.createSimpleForm(firstLinePanel, "Class Name: ", labelWidth));
+		topPanel.add(FormFactory.createTwoInputForm("Class Name: ", txtClassName, "Crit Effect: ", cbxOnCritEffect, labelWidth));
 		
 		MultiStatPanel weaponPanel = new MultiStatPanel(new String[] {
 				"atk: ", "0/0", "min dmg: ", "6/1", "max dmg: ", "12/2", "crit: ", "4/1", "spd: ", "1/1"
 		});
-		topPanel.add(FormFactory.createSimpleForm(weaponPanel, "Weapon: ", labelWidth));
+		topPanel.add(FormFactory.createOneInputForm("Weapon: ", weaponPanel, labelWidth));
 		
 		MultiStatPanel armorPanel = new MultiStatPanel(new String[] {
 				"def: ", "5/5", "prot: ", "0/0", "hp: ", "33/7", "spd: ", "0/0"
 		});
-		topPanel.add(FormFactory.createSimpleForm(armorPanel, "Armor: ", labelWidth));
+		topPanel.add(FormFactory.createOneInputForm("Armor: ", armorPanel, labelWidth));
 		
 		MultiStatPanel resistancesPanel1 = new MultiStatPanel(new String[] {
 				"stun: ", "40", "poison: ", "30", "bleed: ", "30", "disease: ", "30"
 		});
-		topPanel.add(FormFactory.createSimpleForm(resistancesPanel1, "Resistances: ", labelWidth));
+		topPanel.add(FormFactory.createOneInputForm("Resistances: ", resistancesPanel1, labelWidth));
 		
 		MultiStatPanel resistancesPanel2 = new MultiStatPanel(new String[] {
 				"move: ", "40", "debuff: ", "30", "death: ", "67", "trap: ", "10"
 		});
-		topPanel.add(FormFactory.createSimpleForm(resistancesPanel2, "Resistances: ", labelWidth));
+		topPanel.add(FormFactory.createOneInputForm("Resistances: ", resistancesPanel2, labelWidth));
 		
-		CombatSkillsPanel cbxCombatSkills = new CombatSkillsPanel(infoFileCreator);
-		cbxCombatSkills.setFocusable(false);
-		topPanel.add(FormFactory.createSimpleForm(cbxCombatSkills, "Combat Skills: ", labelWidth));
+		CombatSkillsPanel combatSkillsPanel = new CombatSkillsPanel(infoFileCreator);
+		combatSkillsPanel.setFocusable(false);
+		topPanel.add(FormFactory.createOneInputForm("Combat Skills: ", combatSkillsPanel, labelWidth));
+		onDisposeCleanUpList.add(() -> {
+			combatSkillsPanel.disposeDialogs();
+		});
 		
 		panel.add(topPanel, BorderLayout.PAGE_START);
 		return panel;

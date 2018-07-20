@@ -9,11 +9,16 @@ import java.nio.file.Paths;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
+import ui.MainWindow;
+
 public class Globals {
 
 	public static final String WORKING_DIR = Paths.get("").toAbsolutePath().toString();
-	public static final Dimension WINDOW_SIZE = new Dimension(800, 450);
 	public static final Font FONT_CONSOLAS = new Font("Consolas", Font.PLAIN, 12);;
+	
+	public static MainWindow MAIN_WINDOW;
+	public static final Dimension MAIN_WINDOW_SIZE = new Dimension(800, 450);
+	public static final Dimension EDIT_COMBATSKILL_DIALOG_SIZE = new Dimension(700, 400);
 	
 	/**
 	 * Checks whether the specified Class/Skill/Effect name is valid.<br>

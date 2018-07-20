@@ -1,5 +1,6 @@
 package app;
 
+import app.utils.Globals;
 import ui.MainWindow;
 
 /**
@@ -9,7 +10,9 @@ import ui.MainWindow;
 public class Main {
 
 	public static void main(String[] args) {
-		new MainWindow().packAndShow();
+		Globals.MAIN_WINDOW = new MainWindow();
+		Globals.MAIN_WINDOW.createFeaturePanels();
+		Globals.MAIN_WINDOW.packAndShow();
 	}
 	
 }
