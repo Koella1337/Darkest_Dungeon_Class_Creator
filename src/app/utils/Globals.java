@@ -21,14 +21,6 @@ public class Globals {
 	public static final Dimension EDIT_COMBATSKILL_DIALOG_SIZE = new Dimension(700, 400);
 	
 	/**
-	 * Checks whether the specified Class/Skill/Effect name is valid.<br>
-	 * It is valid if it only contains lowercase letters with '_' in-between.
-	 */
-	public static boolean isNameValid(String name) {
-		return name.matches("([a-z]+(_[a-z]+)?)+");
-	}
-	
-	/**
 	 * Shows the user a GUI error warning.
 	 */
 	public static void displayError(String msg) {

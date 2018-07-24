@@ -5,10 +5,15 @@ import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ItemEvent;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
@@ -17,6 +22,7 @@ import app.model.CombatSkill;
 import app.utils.Globals;
 import app.utils.Strings;
 import ui.utils.FormFactory;
+import ui.utils.RankPanel;
 
 /**
  * A JDialog that lets the user edit a Combat Skill.
@@ -25,32 +31,52 @@ import ui.utils.FormFactory;
 @SuppressWarnings("serial")
 public class EditCombatSkillDialog extends JDialog {
 	
+	private final CombatSkill skill;
+	private final JButton btnConfirm, btnReset;
+	
 	private final JTextField txtID;
 	private final JComboBox<CombatSkill.Type> cbxType;
-	
-	private final CombatSkill skill;
-	private final JButton btnConfirm, btnReset, btnHide;
+	private final JRadioButton rbRanged, rbMelee;
+	private final JCheckBox checkAoe, checkRandom;
+	private final RankPanel rankPanelTarget, rankPanelLaunch;
 
 	public EditCombatSkillDialog(Window owner, CombatSkill skillToEdit) {
 		super(owner, String.format("Edit Combat Skill \"%s\"", skillToEdit.id) , ModalityType.MODELESS);
-		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		this.skill = skillToEdit;
 		
+		btnConfirm = createConfirmButton();
+		btnReset = createResetButton();
 
 		txtID = new JTextField();
 		
+		checkRandom = new JCheckBox("Random");
+		checkRandom.setFocusable(false);
+		
+		checkAoe = new JCheckBox("AOE");
+		checkAoe.setFocusable(false);
+		checkAoe.addItemListener(ev -> {
+			checkRandom.setEnabled(!checkAoe.isSelected());
+		});
+		
+		rbRanged = new JRadioButton("Ranged Skill");
+		rbRanged.setFocusable(false);
+		
+		rbMelee = new JRadioButton("Melee Skill");
+		rbMelee.setFocusable(false);
+		
+		rankPanelTarget = new RankPanel(true);
+		rankPanelLaunch = new RankPanel(false);
+		
 		cbxType = new JComboBox<>(CombatSkill.Type.values());
 		cbxType.setFocusable(false);
+		cbxType.setSelectedItem(null);
 		cbxType.addItemListener(ev -> {
 			if (ev.getStateChange() == ItemEvent.SELECTED) {
-				disableIrrelevantComponents();
+				this.disableComponentsByType((CombatSkill.Type) ev.getItem());
 			}
 		});
 		
-		
-		this.skill = skillToEdit;
-		btnConfirm = createConfirmButton();
-		btnReset = createResetButton();
-		btnHide = createHideButton();
 		this.add(createMainPanel());
 		this.pack();
 	}
@@ -66,15 +92,17 @@ public class EditCombatSkillDialog extends JDialog {
 		panel.setPreferredSize(Globals.EDIT_COMBATSKILL_DIALOG_SIZE);
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
-		final JPanel topPanel = new JPanel(new GridLayout(0, 1));
+		final JPanel topPanel = new JPanel();
+		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.PAGE_AXIS));
 		final int labelWidth = 90;
 		
 		topPanel.add(FormFactory.createTwoInputForm("Skill Name: ", txtID, "Type: ", cbxType, labelWidth));
+		topPanel.add(FormFactory.createOneInputForm("Target Mod: ", createTargetModifierPanel(), labelWidth));
+		topPanel.add(FormFactory.createTwoInputForm("Target Ranks: ", rankPanelTarget, "Launch Ranks: ", rankPanelLaunch, labelWidth));
 		
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 0, 5, 0));
 		buttonPanel.add(btnConfirm);
 		buttonPanel.add(btnReset);
-		buttonPanel.add(btnHide);
 		
 		btnReset.doClick();
 		panel.add(topPanel, BorderLayout.PAGE_START);
@@ -82,13 +110,19 @@ public class EditCombatSkillDialog extends JDialog {
 		return panel;
 	}
 	
+	// ----------------------------------- COMPONENT - CREATING METHODS -----------------------------------
+	
 	private JButton createConfirmButton() {
 		JButton btnConfirm = new JButton("Confirm");
 		btnConfirm.addActionListener(ev -> {
 			//TODO: verify and then actually set the skill's variables with values from the input components
+			System.out.println("Target:" + rankPanelTarget.getRanks());
+			System.out.println("Launch:" + rankPanelLaunch.getRanks());
+			
+			//TODO: uncomment this.setVisible(false);
 		});
 		btnConfirm.setToolTipText(Strings.wrapWithHtml(
-				"When pressing this button your changes will be verified and,<br>"
+				"When pressing this button your changes will be validated and,<br>"
 				+ "if they are valid, saved to the Combat Skill's values."
 		));
 		btnConfirm.setFocusable(false);
@@ -100,10 +134,13 @@ public class EditCombatSkillDialog extends JDialog {
 		btnReset.addActionListener(ev -> {
 			//reset all input components back to the skill's variables
 			txtID.setText(skill.id);
-			
 			cbxType.setSelectedItem(skill.type);
-			
-			
+			checkAoe.setSelected(skill.isAoe);
+			checkRandom.setSelected(skill.isRandom);
+			rbMelee.setSelected(skill.isMelee);
+			rbRanged.setSelected(!skill.isMelee);
+			rankPanelTarget.setRanks(skill.target);
+			rankPanelLaunch.setRanks(skill.launch);
 		});
 		btnReset.setToolTipText(Strings.wrapWithHtml(
 				"ATTENTION! This gets rid of every change you haven't confirmed yet!<br>"
@@ -113,29 +150,43 @@ public class EditCombatSkillDialog extends JDialog {
 		return btnReset;
 	}
 	
-	private JButton createHideButton() {
-		JButton btnHide = new JButton("Hide");
-		btnHide.addActionListener(ev -> {
-			this.setVisible(false);
-		});
-		btnHide.setToolTipText(Strings.wrapWithHtml(
-				"Hides the window without actually changing the Combat Skill's values.<br>"
-				+ "Make sure to press Confirm first if you want your changes to stick!"
-		));
-		btnHide.setFocusable(false);
-		return btnHide;
+	private JPanel createTargetModifierPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
+		
+		ButtonGroup rangedVsMelee = new ButtonGroup();
+		rangedVsMelee.add(rbRanged);
+		rangedVsMelee.add(rbMelee);
+		
+		panel.add(checkAoe);
+		panel.add(checkRandom);
+		panel.add(Box.createHorizontalGlue());
+		panel.add(rbRanged);
+		panel.add(rbMelee);
+		return panel;
 	}
+	
 
-	/**
-	 * Disables components that will not change the printing of the skill based on the skills "more important" variables.<br>
-	 * For example: When a skill is AOE then the checkbox for "Random Target" will be disabled.
-	 */
-	private void disableIrrelevantComponents(/*TODO: maybe add param. "JComponent importantComp" */) {
-		if (cbxType.getSelectedItem() == CombatSkill.Type.HEAL) {
-			txtID.setEnabled(false);
-		}
-		else {
-			txtID.setEnabled(true);
+	/* ----------------------------------- COMPONENT - DISABLING METHODS -----------------------------------
+	 * The following methods disable components that won't change the printing of the skill.
+	 * Each method is based on a specific "more important" variable that has an impact on other variables.
+	 * For example: When a skill is AOE then the checkbox for "Random Target" will be disabled.           */
+	
+	private void disableComponentsByType(CombatSkill.Type type) {
+		txtID.setEnabled(true);
+		switch (type) {
+			case DAMAGE: 
+				txtID.setEnabled(false);
+				break;
+			case HEAL:
+				
+				break;
+			case BUFF:
+				
+				break;
+			case DEBUFF:
+				
+				break;
 		}
 		
 	}

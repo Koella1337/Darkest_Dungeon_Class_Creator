@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import app.utils.Globals;
+import app.utils.Validations;
 
 /**
  * Used to rename all files of an existing Darkest Dungeon class.<br>
@@ -38,7 +38,7 @@ public class ClassRenamer {
 		if (name.startsWith("eqp_")) return false;
 		if (name.equals("icons_equip")) return false;
 		
-		return Globals.isNameValid(name);
+		return Validations.isNameValid(name);
 	}
 	
 	/** 

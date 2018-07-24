@@ -52,10 +52,12 @@ public class CombatSkill {
 			effects = "\"test1\" \"test2\"";
 			generation_guaranteed = true;
 			move.min = 1;
+			this.launch = "23";
 		}
 		else if (id.endsWith("three")) {
 			this.type = Type.BUFF;
 			isRandom = true;
+			isMelee = true;
 		}
 		else if (id.endsWith("four")) {
 			this.type = Type.DEBUFF;
@@ -64,6 +66,7 @@ public class CombatSkill {
 			effects = "\"test1\"";
 			per_battle_limit = 2;
 			move.max = 3;
+			this.target = "123";
 		}
 	}
 	
