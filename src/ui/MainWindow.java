@@ -66,7 +66,8 @@ public class MainWindow extends JFrame {
 	 */
 	public void createFeaturePanels() {
 		featureTabsPane.add("Rename existing class", createClassRenamingPanel());
-		featureTabsPane.add("Create \".info\" file", createInfoCreationPanel());
+		featureTabsPane.add("Create \".info\" file", createInfoFileCreationPanel());
+		featureTabsPane.add("Create \".art\" file", createArtFileCreationPanel());
 		featureTabsPane.add("Create an effect", createEffectCreationPanel());
 	}
 	
@@ -128,7 +129,7 @@ public class MainWindow extends JFrame {
 		return panel;
 	}
 	
-	private JPanel createInfoCreationPanel() {
+	private JPanel createInfoFileCreationPanel() {
 		final JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
@@ -162,6 +163,8 @@ public class MainWindow extends JFrame {
 		});
 		topPanel.add(FormFactory.createOneInputForm("Resistances: ", resistancesPanel2, labelWidth));
 		
+		//TODO: move back/forward, other extras
+		
 		CombatSkillsPanel combatSkillsPanel = new CombatSkillsPanel(infoFileCreator);
 		combatSkillsPanel.setFocusable(false);
 		topPanel.add(FormFactory.createOneInputForm("Combat Skills: ", combatSkillsPanel, labelWidth));
@@ -172,8 +175,21 @@ public class MainWindow extends JFrame {
 		panel.add(topPanel, BorderLayout.PAGE_START);
 		return panel;
 	}
+	
+	private JPanel createArtFileCreationPanel() {
+		//TODO: make art file creation feature
+		return createComingSoonPanel();
+	}
 
 	private JPanel createEffectCreationPanel() {
+		//TODO: make effect creation feature
+		return createComingSoonPanel();
+	}
+	
+	/**
+	 * This panel displays a large "COMING SOON" label for upcoming features.
+	 */
+	private JPanel createComingSoonPanel() {
 		final JPanel panel = new JPanel(new BorderLayout());
 		
 		JLabel lblComingSoon = new JLabel("Coming soon!", SwingConstants.CENTER);

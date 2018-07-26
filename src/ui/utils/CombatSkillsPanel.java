@@ -34,7 +34,7 @@ public class CombatSkillsPanel extends JPanel{
 		super(new BorderLayout(5, 0));
 		skillToDialogMap = new HashMap<>();
 		for (CombatSkill skill : infoFileCreator.getAllSkills()) {
-			skillToDialogMap.put(skill, new EditCombatSkillDialog(Globals.MAIN_WINDOW, skill));
+			skillToDialogMap.put(skill, new EditCombatSkillDialog(skill));
 		}
 		
 		cbxCombatSkills = new JComboBox<>(infoFileCreator.getAllSkills());

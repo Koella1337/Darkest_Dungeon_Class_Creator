@@ -4,12 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-
-import app.model.AtkDmgCritStruct;
 
 /**
  * 
@@ -48,12 +48,20 @@ public class FormFactory {
 		return createOneInputForm(labelText1, firstLinePanel, firstLabelWidth);
 	}
 	
-	
-	public static JPanel createAtkDmgCritForm(AtkDmgCritStruct struct) {
-		
-		
-		
-		return null;
+	/**
+	 * Creates a panel that puts all of the components in the specified array into a single line.
+	 * @param components - the specified components to be put into the panel.
+	 * @return a panel with a BoxLayout using only a single row that all components have been added to
+	 */
+	public static JPanel createLinePanel(JComponent[] components) {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
+		for (JComponent c : components) {
+			panel.add(c);
+			panel.add(Box.createHorizontalGlue());		//create spacing in-between components
+		}
+		panel.remove(panel.getComponentCount() - 1);	//remove last glue
+		return panel;
 	}
 	
 }

@@ -1,6 +1,8 @@
 package app.model;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import app.utils.Strings;
 
@@ -17,7 +19,7 @@ public class CombatSkill {
 	public Type type;
 	public boolean isMelee, isAoe, isRandom;
 	public String launch, target;
-	public String effects;		//TODO: probably use List<Effect> instead
+	public List<String> effects;
 	
 	public AtkDmgCritStruct atkDmgCrit;
 	public MinMaxStruct heal;
@@ -39,7 +41,7 @@ public class CombatSkill {
 		this.target = "1234";
 		this.atkDmgCrit = new AtkDmgCritStruct();
 		this.heal = new MinMaxStruct();
-		this.effects = "";
+		this.effects = new ArrayList<>();
 		
 		//TODO: remove
 		ignore_protection = true;
@@ -49,7 +51,8 @@ public class CombatSkill {
 		if (id.endsWith("two")) {
 			this.type = Type.HEAL;
 			isAoe = true;
-			effects = "\"test1\" \"test2\"";
+			for (int i = 1; i <= 50; i++)
+				effects.add(Strings.wrapWithQuotationMarks("test_" + i));
 			generation_guaranteed = true;
 			move.min = 1;
 			this.launch = "23";
@@ -58,12 +61,14 @@ public class CombatSkill {
 			this.type = Type.BUFF;
 			isRandom = true;
 			isMelee = true;
+			self_target_valid = true;
+			ignore_stealth = false;
 		}
 		else if (id.endsWith("four")) {
 			this.type = Type.DEBUFF;
 			isAoe = true;
 			isRandom = true;
-			effects = "\"test1\"";
+			effects.add(Strings.wrapWithQuotationMarks("test1"));
 			per_battle_limit = 2;
 			move.max = 3;
 			this.target = "123";
@@ -127,8 +132,12 @@ public class CombatSkill {
 				if (ignore_stealth) out.print(".ignore_stealth True ");
 			}
 			
-			if (effects != null && effects.length() > 0) 
-				out.printf(".effect %s ", effects);
+			if (effects != null && effects.size() > 0) {
+				out.print(".effect ");
+				for (String effect : effects) {
+					out.printf("%s ", effect);
+				}
+			}
 			if (generation_guaranteed && i == 0) 
 				out.print(".generation_guaranteed True ");
 			if (type != Type.DAMAGE) 
