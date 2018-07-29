@@ -1,4 +1,4 @@
-package ui.utils;
+package ui.utils.components;
 
 import java.awt.Font;
 import java.awt.event.FocusEvent;

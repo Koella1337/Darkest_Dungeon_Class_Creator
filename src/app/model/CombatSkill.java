@@ -2,6 +2,7 @@ package app.model;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import app.utils.Strings;
@@ -19,7 +20,7 @@ public class CombatSkill {
 	public Type type;
 	public boolean isMelee, isAoe, isRandom;
 	public String launch, target;
-	public List<String> effects;
+	public List<Effect> effects;
 	
 	public AtkDmgCritStruct atkDmgCrit;
 	public MinMaxStruct heal;
@@ -52,7 +53,7 @@ public class CombatSkill {
 			this.type = Type.HEAL;
 			isAoe = true;
 			for (int i = 1; i <= 50; i++)
-				effects.add(Strings.wrapWithQuotationMarks("test_" + i));
+				effects.add(new Effect("Test " + i, true));
 			generation_guaranteed = true;
 			move.min = 1;
 			this.launch = "23";
@@ -63,12 +64,14 @@ public class CombatSkill {
 			isMelee = true;
 			self_target_valid = true;
 			ignore_stealth = false;
+			effects = new ArrayList<>(Arrays.asList(Effect.getDefaultEffects()));
 		}
 		else if (id.endsWith("four")) {
 			this.type = Type.DEBUFF;
 			isAoe = true;
 			isRandom = true;
-			effects.add(Strings.wrapWithQuotationMarks("test1"));
+			effects.add(new Effect(Strings.wrapWithQuotationMarks("test1"), true));
+			effects.add(new Effect(Strings.wrapWithQuotationMarks("test1"), false));
 			per_battle_limit = 2;
 			move.max = 3;
 			this.target = "123";
@@ -134,8 +137,9 @@ public class CombatSkill {
 			
 			if (effects != null && effects.size() > 0) {
 				out.print(".effect ");
-				for (String effect : effects) {
-					out.printf("%s ", effect);
+				for (Effect effect : effects) {
+					effect.print(out, i + 1);
+					out.print(" ");
 				}
 			}
 			if (generation_guaranteed && i == 0) 

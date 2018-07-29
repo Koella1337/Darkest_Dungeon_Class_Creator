@@ -37,10 +37,6 @@ public class Strings {
 	}
 	
 	
-	
-	
-	
-	
 	// ------------------ TUTORIALS ------------------
 	
 	public static String getClassRenamingTutorial() {

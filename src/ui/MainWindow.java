@@ -22,12 +22,12 @@ import app.features.ClassRenamer;
 import app.features.InfoFileCreator;
 import app.utils.Globals;
 import app.utils.Strings;
-import ui.utils.AddItemCombobox;
-import ui.utils.CombatSkillsPanel;
 import ui.utils.FormFactory;
-import ui.utils.HelpfulTextfield;
-import ui.utils.MultiStatPanel;
-import ui.utils.TutorialPanel;
+import ui.utils.components.AddItemCombobox;
+import ui.utils.components.CombatSkillsPanel;
+import ui.utils.components.HelpfulTextfield;
+import ui.utils.components.MultiStatPanel;
+import ui.utils.components.TutorialPanel;
 
 /**
  * The main window for the user.

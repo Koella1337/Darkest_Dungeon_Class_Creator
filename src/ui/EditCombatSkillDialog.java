@@ -4,8 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Window;
 import java.awt.event.ItemEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -24,19 +25,23 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.JTableHeader;
 
 import app.model.CombatSkill;
+import app.model.Effect;
 import app.model.StatStruct;
 import app.utils.Globals;
 import app.utils.Strings;
+import ui.utils.EffectListModel;
 import ui.utils.FormFactory;
-import ui.utils.MultiStatPanel;
-import ui.utils.RankPanel;
+import ui.utils.components.HelpfulTextfield;
+import ui.utils.components.MultiStatPanel;
+import ui.utils.components.RankPanel;
 
 /**
  * A JDialog that lets the user edit a Combat Skill.
@@ -57,7 +62,7 @@ public class EditCombatSkillDialog extends JDialog {
 	private final JSpinner spinPerBattleLimit;
 	private final RankPanel rpTarget, rpLaunch;
 	private final MultiStatPanel mstatAtkDmgCrit, mstatHeal, mstatMove;
-	private final DefaultListModel<String> effectListModel;
+	private final DefaultListModel<Effect> effectListModel;
 
 	public EditCombatSkillDialog(CombatSkill skillToEdit) {
 		super(null, ModalityType.MODELESS);
@@ -131,7 +136,18 @@ public class EditCombatSkillDialog extends JDialog {
 			}
 		});
 		
-		effectListModel = new DefaultListModel<>();
+		effectListModel = new DefaultListModel<Effect>() {	//disallow duplicate entries
+			@Override
+			public void add(int index, Effect element) {
+				if (!this.contains(element))
+					super.add(index, element);
+			}
+			@Override
+			public void addElement(Effect element) {
+				if (!this.contains(element))
+					super.addElement(element);
+			}
+		};
 		
 		// --- Finalize ---
 		this.add(createMainPanel());
@@ -153,15 +169,83 @@ public class EditCombatSkillDialog extends JDialog {
 		JPanel topPanel = createTopPanel();
 
 		// --- Create Center Panel ---
-		JList<String> effectList = new JList<>(effectListModel);
+		JList<Effect> effectList = new JList<>(effectListModel);
 		effectList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		effectList.add(new JTableHeader());
+		effectList.setCellRenderer(new ListCellRenderer<Effect>() {
+			private final JPanel panel = new JPanel(new BorderLayout());
+			private final JLabel label = new JLabel();
+			private final JCheckBox checkBox = new JCheckBox("Scales?");
+			{
+				checkBox.setHorizontalTextPosition(SwingConstants.LEADING);
+				checkBox.setEnabled(false);
+				panel.add(label, BorderLayout.CENTER);
+				panel.add(checkBox, BorderLayout.LINE_END);
+			}
+			@Override
+			public Component getListCellRendererComponent(JList<? extends Effect> list, Effect value, int index,
+					boolean isSelected, boolean cellHasFocus) {
+				label.setText(value.getName());
+				checkBox.setSelected(value.getScalesWithLevel());
+				if (isSelected) {
+					checkBox.setBackground(effectList.getSelectionBackground());
+					panel.setBackground(effectList.getSelectionBackground());
+				}
+				else {
+					checkBox.setBackground(effectList.getBackground());
+					panel.setBackground(effectList.getBackground());
+				}
+				return panel;
+			}
+		});
+		
 		JViewport effectListHeader = new JViewport();
 		effectListHeader.setView(new JLabel("Effects"));
 		JScrollPane effectListScrollPane = new JScrollPane(effectList);
 		effectListScrollPane.setColumnHeader(effectListHeader);
 		
 		// --- Create Right Panel ---
+		JPanel rightPanel = new JPanel(new GridLayout(0, 1));
+		
+		JCheckBox chkIsSkillScaling = new JCheckBox("Effect scales: ");
+		chkIsSkillScaling.setHorizontalTextPosition(SwingConstants.LEADING);
+		chkIsSkillScaling.setFocusable(false);
+		
+		JComboBox<Effect> cbxDefaultEffects = new JComboBox<>(Effect.getDefaultEffects());
+		cbxDefaultEffects.setFocusable(false);
+		cbxDefaultEffects.addItemListener(ev -> {
+			if (ev.getStateChange() == ItemEvent.SELECTED) {
+				Effect effect = (Effect) ev.getItem();
+				effect.setScalesWithLevel(chkIsSkillScaling.isSelected());
+				effectListModel.addElement(effect);
+				effectList.repaint();
+			}
+		});
+		chkIsSkillScaling.addItemListener(ev -> {	//reset combobox selection on skill scaling checkbox change
+			cbxDefaultEffects.setSelectedItem(null);
+		});
+		chkIsSkillScaling.setSelected(true);
+		
+		JTextField txtNewEffect = new HelpfulTextfield("New effect name...");
+		txtNewEffect.addKeyListener(new KeyListener() {
+			@Override
+			public void keyReleased(KeyEvent ev) {
+				if (ev.getKeyCode() == KeyEvent.VK_ENTER) {
+					String effectName = txtNewEffect.getText();
+					if (effectName != null && effectName.length() > 0)
+						effectListModel.addElement(new Effect(effectName, chkIsSkillScaling.isSelected()));
+				}
+			}
+			@Override
+			public void keyPressed(KeyEvent e) {}
+			@Override
+			public void keyTyped(KeyEvent e) {}
+		});
+		
+		rightPanel.add(chkIsSkillScaling);
+		rightPanel.add(cbxDefaultEffects);
+		rightPanel.add(new JLabel("Select an Effect to add it to the List."));
+		rightPanel.add(txtNewEffect);
+		rightPanel.add(new JLabel("Type a name and press Enter to add it to the List."));
 		
 		// --- Create Bottom Panel ---
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 0, 5, 0));
@@ -172,6 +256,7 @@ public class EditCombatSkillDialog extends JDialog {
 		btnReset.doClick();
 		panel.add(topPanel, BorderLayout.PAGE_START);
 		panel.add(effectListScrollPane, BorderLayout.CENTER);
+		panel.add(rightPanel, BorderLayout.LINE_END);
 		panel.add(buttonPanel, BorderLayout.PAGE_END);
 		return panel;
 	}
@@ -205,7 +290,11 @@ public class EditCombatSkillDialog extends JDialog {
 		return topPanel;
 	}
 	
+	
+	
+	// ----------------------------------------------------------------------------------------------------
 	// ----------------------------------- COMPONENT - CREATING METHODS -----------------------------------
+	// ----------------------------------------------------------------------------------------------------
 	
 	private JButton createConfirmButton() {
 		JButton btnConfirm = new JButton("Confirm");
@@ -254,7 +343,8 @@ public class EditCombatSkillDialog extends JDialog {
 			mstatMove.setAllStats(skill.move.toStringWithoutPerLvl().split(StatStruct.STAT_SEPARATOR));
 			
 			effectListModel.clear();
-			for (String effect : skill.effects) {
+			for (Effect effect : skill.effects.toArray(new Effect[0])) {
+				//cloned effect list so that UI changes are not reflected in the skill before "Confirm" is pressed
 				effectListModel.addElement(effect);
 			}
 		});
@@ -294,11 +384,14 @@ public class EditCombatSkillDialog extends JDialog {
 		return panel;
 	}
 	
+	
 
+	// ----------------------------------------------------------------------------------------------------
 	/* ----------------------------------- COMPONENT - DISABLING METHODS -----------------------------------
 	 * The following methods disable components that won't change the printing of the skill.
 	 * Each method is based on a specific "more important" variable that has an impact on other variables.
 	 * For example: When a skill is AOE then the checkbox for "Random Target" will be disabled.           */
+	// ----------------------------------------------------------------------------------------------------
 	
 	private void disableComponentsByType(CombatSkill.Type type) {
 		boolean healEnabled = true, damageEnabled = true, selfTargetEnabled = true;
