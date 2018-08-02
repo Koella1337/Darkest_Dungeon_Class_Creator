@@ -11,8 +11,12 @@ public class Effect {
 	 */
 	public static Effect[] getDefaultEffects () {
 		return new Effect[] {
-				new Effect("Unholy Killer 1", true), 		new Effect("Man Killer 1", true), 	new Effect("Beast Killer 1", true),
-				new Effect("Eldritch Killer 1", true)
+			new Effect("Man Killer 1", true), 			new Effect("Beast Killer 1", true),		new Effect("Unholy Killer 1", true),
+			new Effect("Eldritch Killer 1", true),		new Effect("Blight Debuff 1", true),	new Effect("Bleed Debuff 1", true),
+			new Effect("Weak Blight 1", true),			new Effect("Blight 1", true),			new Effect("Strong Blight 1", true),
+			new Effect("Minor Bleed 1", true),			new Effect("Bleed 1", true),			new Effect("Strong Bleed 1", true),
+			new Effect("Arb Mark Target", false),		new Effect("Arb Mark Debuff 1", true),	new Effect("BH Mark Debuff 1", true),
+			new Effect("Weak Stun 1", false),			new Effect("Stun 1", false),			new Effect("Strong Stun 1", false),
 		};
 	}
 	

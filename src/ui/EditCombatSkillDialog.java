@@ -37,7 +37,6 @@ import app.model.Effect;
 import app.model.StatStruct;
 import app.utils.Globals;
 import app.utils.Strings;
-import ui.utils.EffectListModel;
 import ui.utils.FormFactory;
 import ui.utils.components.HelpfulTextfield;
 import ui.utils.components.MultiStatPanel;
@@ -169,83 +168,14 @@ public class EditCombatSkillDialog extends JDialog {
 		JPanel topPanel = createTopPanel();
 
 		// --- Create Center Panel ---
-		JList<Effect> effectList = new JList<>(effectListModel);
-		effectList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		effectList.setCellRenderer(new ListCellRenderer<Effect>() {
-			private final JPanel panel = new JPanel(new BorderLayout());
-			private final JLabel label = new JLabel();
-			private final JCheckBox checkBox = new JCheckBox("Scales?");
-			{
-				checkBox.setHorizontalTextPosition(SwingConstants.LEADING);
-				checkBox.setEnabled(false);
-				panel.add(label, BorderLayout.CENTER);
-				panel.add(checkBox, BorderLayout.LINE_END);
-			}
-			@Override
-			public Component getListCellRendererComponent(JList<? extends Effect> list, Effect value, int index,
-					boolean isSelected, boolean cellHasFocus) {
-				label.setText(value.getName());
-				checkBox.setSelected(value.getScalesWithLevel());
-				if (isSelected) {
-					checkBox.setBackground(effectList.getSelectionBackground());
-					panel.setBackground(effectList.getSelectionBackground());
-				}
-				else {
-					checkBox.setBackground(effectList.getBackground());
-					panel.setBackground(effectList.getBackground());
-				}
-				return panel;
-			}
-		});
-		
+		JList<Effect> effectList = createEffectList();
 		JViewport effectListHeader = new JViewport();
 		effectListHeader.setView(new JLabel("Effects"));
 		JScrollPane effectListScrollPane = new JScrollPane(effectList);
 		effectListScrollPane.setColumnHeader(effectListHeader);
 		
 		// --- Create Right Panel ---
-		JPanel rightPanel = new JPanel(new GridLayout(0, 1));
-		
-		JCheckBox chkIsSkillScaling = new JCheckBox("Effect scales: ");
-		chkIsSkillScaling.setHorizontalTextPosition(SwingConstants.LEADING);
-		chkIsSkillScaling.setFocusable(false);
-		
-		JComboBox<Effect> cbxDefaultEffects = new JComboBox<>(Effect.getDefaultEffects());
-		cbxDefaultEffects.setFocusable(false);
-		cbxDefaultEffects.addItemListener(ev -> {
-			if (ev.getStateChange() == ItemEvent.SELECTED) {
-				Effect effect = (Effect) ev.getItem();
-				effect.setScalesWithLevel(chkIsSkillScaling.isSelected());
-				effectListModel.addElement(effect);
-				effectList.repaint();
-			}
-		});
-		chkIsSkillScaling.addItemListener(ev -> {	//reset combobox selection on skill scaling checkbox change
-			cbxDefaultEffects.setSelectedItem(null);
-		});
-		chkIsSkillScaling.setSelected(true);
-		
-		JTextField txtNewEffect = new HelpfulTextfield("New effect name...");
-		txtNewEffect.addKeyListener(new KeyListener() {
-			@Override
-			public void keyReleased(KeyEvent ev) {
-				if (ev.getKeyCode() == KeyEvent.VK_ENTER) {
-					String effectName = txtNewEffect.getText();
-					if (effectName != null && effectName.length() > 0)
-						effectListModel.addElement(new Effect(effectName, chkIsSkillScaling.isSelected()));
-				}
-			}
-			@Override
-			public void keyPressed(KeyEvent e) {}
-			@Override
-			public void keyTyped(KeyEvent e) {}
-		});
-		
-		rightPanel.add(chkIsSkillScaling);
-		rightPanel.add(cbxDefaultEffects);
-		rightPanel.add(new JLabel("Select an Effect to add it to the List."));
-		rightPanel.add(txtNewEffect);
-		rightPanel.add(new JLabel("Type a name and press Enter to add it to the List."));
+		JPanel rightPanel = createRightPanel(effectList);
 		
 		// --- Create Bottom Panel ---
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 0, 5, 0));
@@ -290,6 +220,105 @@ public class EditCombatSkillDialog extends JDialog {
 		return topPanel;
 	}
 	
+	
+	private final JList<Effect> createEffectList() {
+		JList<Effect> effectList = new JList<>(effectListModel);
+		
+		effectList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		effectList.setCellRenderer(new ListCellRenderer<Effect>() {
+			private final JPanel panel = new JPanel(new BorderLayout());
+			private final JLabel label = new JLabel();
+			private final JCheckBox checkBox = new JCheckBox("Scales?");
+			{
+				checkBox.setHorizontalTextPosition(SwingConstants.LEADING);
+				checkBox.setEnabled(false);
+				panel.add(label, BorderLayout.CENTER);
+				panel.add(checkBox, BorderLayout.LINE_END);
+			}
+			@Override
+			public Component getListCellRendererComponent(JList<? extends Effect> list, Effect value, int index,
+					boolean isSelected, boolean cellHasFocus) {
+				label.setText(value.getName());
+				checkBox.setSelected(value.getScalesWithLevel());
+				if (isSelected) {
+					checkBox.setBackground(effectList.getSelectionBackground());
+					panel.setBackground(effectList.getSelectionBackground());
+				}
+				else {
+					checkBox.setBackground(effectList.getBackground());
+					panel.setBackground(effectList.getBackground());
+				}
+				return panel;
+			}
+		});
+		
+		effectList.addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent ev) {}
+			@Override
+			public void keyPressed(KeyEvent ev) {}
+			@Override
+			public void keyReleased(KeyEvent ev) {
+				if (ev.getKeyCode() == KeyEvent.VK_DELETE || ev.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+					int selectedIndex = effectList.getSelectedIndex();
+					if (selectedIndex >= 0)
+						effectListModel.remove(selectedIndex);
+				}
+			}
+		});
+		
+		effectList.setToolTipText("Press DEL or Backspace to remove an effect.");
+		return effectList;
+	}
+	
+	private JPanel createRightPanel(JList<Effect> effectList) {
+		JPanel rightPanel = new JPanel(new GridLayout(0, 1));
+		
+		JCheckBox chkIsSkillScaling = new JCheckBox("Effect scales: ");
+		chkIsSkillScaling.setHorizontalTextPosition(SwingConstants.LEADING);
+		chkIsSkillScaling.setFocusable(false);
+		
+		JComboBox<Effect> cbxDefaultEffects = new JComboBox<>(Effect.getDefaultEffects());
+		cbxDefaultEffects.setFocusable(false);
+		cbxDefaultEffects.addItemListener(ev -> {
+			if (ev.getStateChange() == ItemEvent.SELECTED) {
+				Effect effect = (Effect) ev.getItem();
+				effect.setScalesWithLevel(chkIsSkillScaling.isSelected());
+				effectListModel.addElement(effect);
+				effectList.repaint();
+			}
+		});
+		cbxDefaultEffects.setToolTipText("Choose from some basic effects found in \"effects\\base.effects.darkest\"");
+		chkIsSkillScaling.addItemListener(ev -> {	//reset combobox selection on skill scaling checkbox change
+			cbxDefaultEffects.setSelectedItem(null);
+		});
+		chkIsSkillScaling.setSelected(true);
+		
+		JTextField txtNewEffect = new HelpfulTextfield("New effect name...");
+		txtNewEffect.addKeyListener(new KeyListener() {
+			@Override
+			public void keyReleased(KeyEvent ev) {
+				if (ev.getKeyCode() == KeyEvent.VK_ENTER) {
+					String effectName = txtNewEffect.getText();
+					if (effectName != null && effectName.length() > 0) {
+						effectListModel.addElement(new Effect(effectName, chkIsSkillScaling.isSelected()));
+						txtNewEffect.setText("");
+					}
+				}
+			}
+			@Override
+			public void keyPressed(KeyEvent e) {}
+			@Override
+			public void keyTyped(KeyEvent e) {}
+		});
+		
+		rightPanel.add(chkIsSkillScaling);
+		rightPanel.add(cbxDefaultEffects);
+		rightPanel.add(new JLabel("Select an Effect to add it to the List."));
+		rightPanel.add(txtNewEffect);
+		rightPanel.add(new JLabel("Type a name and press Enter to add it to the List."));
+		return rightPanel;
+	}
 	
 	
 	// ----------------------------------------------------------------------------------------------------
